@@ -1687,3 +1687,5 @@ app.get('/api/admin/audit-logs', requireAuth, requireSuperAdmin, async (req: Req
 app.listen(PORT, () => {
   console.log(`[Server] KULMITRA SaaS backend running on port ${PORT}`);
 });
+
+export default app;
