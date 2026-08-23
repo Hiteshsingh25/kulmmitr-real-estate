@@ -65,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
           
-          <div style={{ background: 'white', border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px 12px', display: 'flex', alignItems: 'center', justifyBetween: 'space-between', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: 'white', border: '1px solid #f1f5f9', borderRadius: '8px', padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
             <div>
               <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 650 }}>Automation Rate</div>
               <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-primary)', marginTop: '2px' }}>

@@ -3,8 +3,7 @@ import ReactFlow, {
   Controls,
   Background,
   MiniMap,
-  useReactFlow,
-  addEdge
+  useReactFlow
 } from 'reactflow';
 import type { Node, Edge, Connection } from 'reactflow';
 import 'reactflow/dist/style.css';
@@ -49,8 +48,6 @@ export const Canvas: React.FC<CanvasProps> = ({
       event.preventDefault();
 
       if (!reactFlowWrapper.current || !reactFlowInstance) return;
-
-      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
       const type = event.dataTransfer.getData('application/reactflow');
 
       // Check if dropped item type is valid

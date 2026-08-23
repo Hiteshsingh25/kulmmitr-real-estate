@@ -7,7 +7,7 @@ import {
   fetchExecutions
 } from '../api';
 import type { Lead, WorkflowExecution } from '../api';
-import { Search, Plus, Filter, ArrowUpDown, ChevronLeft, ChevronRight, Edit2, Trash2, Mail, Phone, Calendar, AlertCircle } from 'lucide-react';
+import { Search, Plus, ArrowUpDown, ChevronLeft, ChevronRight, Edit2, Trash2, Mail, Phone, Calendar, AlertCircle } from 'lucide-react';
 
 interface LeadsManagerProps {
   orgId: string;
@@ -449,7 +449,7 @@ export const LeadsManager: React.FC<LeadsManagerProps> = ({ orgId, workspaceId, 
             width: '100%',
             maxWidth: '450px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', marginBottom: '16px' }}>
+             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'white' }}>
                 {editingLead ? 'Edit Lead Details' : 'Add New Prospect Lead'}
               </h3>

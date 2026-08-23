@@ -5,7 +5,7 @@ import {
   useEdgesState, 
   addEdge
 } from 'reactflow';
-import type { Connection, Edge, Node } from 'reactflow';
+import type { Connection, Node } from 'reactflow';
 import { Canvas } from './components/Canvas';
 import { Sidebar } from './components/Sidebar';
 import { LogViewer } from './components/LogViewer';
@@ -25,7 +25,6 @@ import {
   fetchWorkspaceSummary,
   fetchMembers,
   inviteMember,
-  updateMemberRole,
   removeMember,
   fetchBilling,
   upgradePlan,
@@ -43,7 +42,6 @@ import {
   updateAdminOrgStatus,
   deleteAdminOrg,
   fetchAdminPlans,
-  createAdminPlan,
   updateAdminPlan,
   fetchAdminAuditLogs
 } from './api';
@@ -64,9 +62,9 @@ import type {
 } from './api';
 import { 
   Shield, Sparkles, Send, Settings, Users, Layers, 
-  BarChart2, LayoutDashboard, Database, Key, LogOut, 
-  User as UserIcon, Plus, Mail, ChevronRight, Lock, 
-  HelpCircle, CreditCard, Activity, Trash2, Eye, CheckCircle2, AlertTriangle
+  BarChart2, LayoutDashboard, Database, LogOut, 
+  User as UserIcon, Plus, Mail, ChevronRight, 
+  CreditCard, Activity, Trash2, AlertTriangle
 } from 'lucide-react';
 
 interface Toast {
@@ -159,7 +157,7 @@ const AppContent: React.FC = () => {
   // UI Dialog States
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [isRefreshing] = useState<boolean>(false);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
 
   // Toast notification helper
@@ -598,7 +596,7 @@ const AppContent: React.FC = () => {
         loadUserIdentity();
       } else {
         if (!authName.trim()) return;
-        const data = await register(authEmail, authName, authPassword);
+        await register(authEmail, authName, authPassword);
         showToast(`Account created successfully, ${authName}!`, 'success');
         setAuthEmail('');
         setAuthName('');
@@ -821,7 +819,7 @@ const AppContent: React.FC = () => {
             width: '100%',
             maxWidth: '450px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>Create New Workspace</h3>
             </div>
             
@@ -1201,7 +1199,7 @@ const AppContent: React.FC = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
                     {/* Leads limit progress */}
                     <div>
-                      <div style={{ display: 'flex', justifyBetween: 'space-between', fontSize: '0.8rem', fontWeight: 650, color: '#475569', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 650, color: '#475569', marginBottom: '6px' }}>
                         <span>CRM Leads Scoped</span>
                         <span style={{ marginLeft: 'auto' }}>{billingDetails.usage.leads} / {billingDetails.limits.maxLeads}</span>
                       </div>
@@ -1212,7 +1210,7 @@ const AppContent: React.FC = () => {
 
                     {/* Workspaces limit progress */}
                     <div>
-                      <div style={{ display: 'flex', justifyBetween: 'space-between', fontSize: '0.8rem', fontWeight: 650, color: '#475569', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 650, color: '#475569', marginBottom: '6px' }}>
                         <span>Segregated Workspaces</span>
                         <span style={{ marginLeft: 'auto' }}>{billingDetails.usage.workspaces} / {billingDetails.limits.maxWorkspaces}</span>
                       </div>
@@ -1223,7 +1221,7 @@ const AppContent: React.FC = () => {
 
                     {/* Executions limit progress */}
                     <div>
-                      <div style={{ display: 'flex', justifyBetween: 'space-between', fontSize: '0.8rem', fontWeight: 650, color: '#475569', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 650, color: '#475569', marginBottom: '6px' }}>
                         <span>Automation Run Executions</span>
                         <span style={{ marginLeft: 'auto' }}>{billingDetails.usage.executions} / {billingDetails.limits.maxExecutions}</span>
                       </div>
@@ -1244,7 +1242,7 @@ const AppContent: React.FC = () => {
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {executions.slice(0, 5).map((ex, idx) => (
-                      <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', fontSize: '0.8rem', borderBottom: '1px solid #f8fafc', paddingBottom: '8px' }}>
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', borderBottom: '1px solid #f8fafc', paddingBottom: '8px' }}>
                         <div>
                           <div style={{ fontWeight: 600, color: '#0f172a' }}>Lead ID: {ex.contactId}</div>
                           <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Workflow: {ex.workflow?.name}</div>
@@ -1300,7 +1298,7 @@ const AppContent: React.FC = () => {
           {/* TAB 3: AUTOMATIONS LIST */}
           {activeTab === 'automations' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>Automations</h2>
                   <p style={{ fontSize: '0.85rem', color: '#64748b' }}>Configure message triggers, validation flows, and WhatsApp outbox responders.</p>
@@ -1338,7 +1336,7 @@ const AppContent: React.FC = () => {
                           {wf.updatedAt ? new Date(wf.updatedAt).toLocaleDateString() : 'N/A'}
                         </td>
                         <td style={{ textAlign: 'right' }}>
-                          <div style={{ display: 'flex', gap: '8px', justifyBetween: 'flex-end', justifyContent: 'flex-end' }}>
+                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                             <button 
                               className="btn" 
                               onClick={() => {
@@ -1504,7 +1502,7 @@ const AppContent: React.FC = () => {
                 
                 {/* SVG representing runs */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', justifyBetween: 'space-between', fontSize: '0.8rem', color: '#475569' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#475569' }}>
                     <span>Success Rate Rate</span>
                     <span style={{ marginLeft: 'auto', fontWeight: 'bold' }}>{summary?.successRate || 100}%</span>
                   </div>
@@ -1953,7 +1951,7 @@ const AppContent: React.FC = () => {
                         </td>
                         <td style={{ fontSize: '0.8rem', color: '#64748b' }}>{new Date(org.createdAt).toLocaleDateString()}</td>
                         <td style={{ textAlign: 'right' }}>
-                          <div style={{ display: 'flex', gap: '8px', justifyBetween: 'flex-end', justifyContent: 'flex-end' }}>
+                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                             <button 
                               className="btn" 
                               onClick={async () => {
