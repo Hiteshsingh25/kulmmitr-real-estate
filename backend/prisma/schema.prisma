@@ -1,0 +1,165 @@
+// Prisma schema for KULMITRA Multi-Tenant WhatsApp SaaS Platform
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String               @id @default(uuid())
+  email        String               @unique
+  name         String?
+  passwordHash String
+  passwordSalt String
+  role         String               @default("USER") // SUPER_ADMIN, USER
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  memberships  OrganizationMember[]
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Plan {
+  id            String         @id @default(uuid())
+  name          String         @unique // Free, Pro, Enterprise
+  price         Float
+  maxWorkspaces Int
+  maxLeads      Int
+  maxExecutions Int
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  organizations Organization[]
+}
+
+model Organization {
+  id          String               @id @default(uuid())
+  name        String
+  description String?
+  status      String               @default("ACTIVE") // ACTIVE, SUSPENDED
+  planId      String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  
+  plan        Plan?                @relation(fields: [planId], references: [id])
+  members     OrganizationMember[]
+  workspaces  Workspace[]
+  auditLogs   AuditLog[]
+}
+
+model OrganizationMember {
+  id        String       @id @default(uuid())
+  orgId     String
+  userId    String
+  role      String       @default("MEMBER") // OWNER, ADMIN, MEMBER, VIEWER
+  status    String       @default("ACTIVE") // ACTIVE, INVITED
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([orgId, userId])
+}
+
+model Workspace {
+  id              String              @id @default(uuid())
+  orgId           String
+  name            String
+  description     String?
+  status          String              @default("ACTIVE") // ACTIVE, INACTIVE
+  securityType    String              @default("PRIVATE") // PRIVATE, MEMBERS, PUBLIC
+  passwordHash    String?
+  passwordSalt    String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  
+  organization    Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  workflows       Workflow[]
+  leads           Lead[]
+  executions      WorkflowExecution[]
+  auditLogs       AuditLog[]
+  whatsAppNumbers WhatsAppNumber[]
+}
+
+model Workflow {
+  id          String              @id @default(uuid())
+  workspaceId String
+  name        String
+  status      String              @default("DRAFT") // ACTIVE, DRAFT, INACTIVE
+  definition  String              // React Flow JSON serialized string
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  
+  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  executions  WorkflowExecution[]
+}
+
+model WorkflowExecution {
+  id                String              @id @default(uuid())
+  workflowId        String
+  workspaceId       String
+  contactId         String
+  status            String              // SUCCESS, FAILED
+  stepResults       String              // JSON serialized array of steps
+  externalMessageId String?             @unique
+  createdAt         DateTime            @default(now())
+  
+  workflow          Workflow            @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workspace         Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model WhatsAppNumber {
+  id                String    @id @default(uuid())
+  workspaceId       String
+  phoneNumberId     String    @unique
+  phoneNumber       String
+  businessAccountId String?
+  accessToken       String?
+  status            String    @default("ACTIVE")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model Lead {
+  id          String              @id @default(uuid())
+  workspaceId String
+  name        String
+  email       String?
+  phone       String
+  status      String              @default("NEW") // NEW, CONTACTED, QUALIFIED, LOST
+  source      String              @default("WEBHOOK") // WEBHOOK, MANUAL, FACEBOOK
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  
+  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id          String              @id @default(uuid())
+  orgId       String
+  workspaceId String?
+  userId      String?
+  userEmail   String?
+  action      String
+  resource    String
+  details     String?
+  timestamp   DateTime            @default(now())
+  
+  organization Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  workspace    Workspace?          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
